@@ -2,6 +2,12 @@
 
 # Development tools
 bpython  # Interactive Python interpreter with advanced features
+flake8
+isort
+black
+build
+
+# Utility
 tqdm  # Library for displaying progress bars to measure progress over time
 
 # File identification and extraction
