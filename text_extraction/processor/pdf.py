@@ -1,5 +1,5 @@
 """
-byte_pair/processor/pdf.py
+text_extraction/processor/pdf.py
 
 Copyright (C) 2024 Austin Berrio
 """

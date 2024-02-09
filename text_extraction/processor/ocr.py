@@ -1,5 +1,5 @@
 """
-byte_pair/processor/ocr.py
+text_extraction/processor/ocr.py
 
 Copyright (C) 2024 Austin Berrio
 
