@@ -15,31 +15,27 @@ from text_extraction.logger import get_default_logger
 
 
 class FileManager:
-    def __init__(self, logger: Optional[logging.Logger] = None):
-        if logger:
-            self.logger = logger
-        else:
-            self.logger = get_default_logger(self.__class__.__name__, logging.INFO)
-
-    def read(self, file_path: str) -> Optional[str]:
+    @staticmethod
+    def read(file_path: str) -> Optional[str]:
         """Read content from a source file."""
         try:
             with open(file_path, "r") as f:
                 return f.read()
         except Exception as e:
-            self.logging.error(
+            get_default_logger(__name__, logging.ERROR).error(
                 f"An error occurred while reading from the source file: {e}"
             )
         return None
 
-    def write(self, file_path: str, content: str) -> None:
+    @staticmethod
+    def write(file_path: str, content: str) -> None:
         """Write content to a destination file."""
         try:
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             with open(file_path, "w") as f:
                 f.write(content)
         except Exception as e:
-            self.logging.error(
+            get_default_logger(__name__, logging.ERROR).error(
                 f"An error occurred while writing to the destination file: {e}"
             )
 
