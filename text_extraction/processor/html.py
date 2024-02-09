@@ -1,7 +1,6 @@
 """
 byte_pair/processor/html.py
 
-Byte Pair Encoding (BPE) Tokenization for Natural Language Processing
 Copyright (C) 2024 Austin Berrio
 """
 
