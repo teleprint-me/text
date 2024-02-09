@@ -7,63 +7,14 @@ Copyright (C) 2024 Austin Berrio
 import logging
 import os
 import re
-from concurrent.futures import ThreadPoolExecutor
-from typing import List, Optional, Union
 
 import html2text
 import tqdm
 from bs4 import BeautifulSoup
 from markdown_it import MarkdownIt
 
-# Initialize logging
-logging.basicConfig(level=logging.INFO)
-
-
-def read(source_file: str) -> Optional[str]:
-    """Read content from a source file."""
-    try:
-        with open(source_file, "r") as f:
-            return f.read()
-    except Exception as e:
-        logging.error(f"An error occurred while reading from the source file: {e}")
-    return None
-
-
-def write(file_path: str, content: str) -> None:
-    """Write content to a destination file."""
-    try:
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, "w") as f:
-            f.write(content)
-    except Exception as e:
-        logging.error(f"An error occurred while writing to the destination file: {e}")
-
-
-def collect_files(dir_entry: Union[str, os.DirEntry]) -> List[os.DirEntry]:
-    """Collect all file entries in a directory recursively."""
-    file_entry_list = []
-    for entry in os.scandir(
-        dir_entry.path if isinstance(dir_entry, os.DirEntry) else dir_entry
-    ):
-        if entry.is_file():
-            file_entry_list.append(entry)
-        elif entry.is_dir():
-            file_entry_list.extend(collect_files(entry))
-    return file_entry_list
-
-
-def traverse_directory(
-    file_entry_list: List[os.DirEntry],
-    n_threads: int,
-    dry_run: bool,
-) -> None:
-    with ThreadPoolExecutor(max_workers=n_threads) as executor:
-        with tqdm.tqdm(total=len(file_entry_list)) as pbar:
-            for _ in executor.map(
-                lambda file_entry: process_entry(file_entry, pbar, dry_run),
-                file_entry_list,
-            ):
-                pass
+from text_extraction.file_manager import FileManager
+from text_extraction.logger import get_default_logger
 
 
 def clean_code_blocks(html: str) -> str:
@@ -110,9 +61,9 @@ def process_entry(file_entry: os.DirEntry, pbar: tqdm.tqdm, dry_run: bool) -> No
     md = MarkdownIt()
     output_path = os.path.join("markdown_dataset", file_entry.path)
 
-    html_content = read(file_entry.path)
+    html_content = FileManager.read(file_entry.path)
     if html_content is None:
-        logging.error(
+        get_default_logger(__name__, logging.ERROR).error(
             f"An error occurred while reading the file {file_entry.name}. Skipping."
         )
         return
@@ -123,7 +74,9 @@ def process_entry(file_entry: os.DirEntry, pbar: tqdm.tqdm, dry_run: bool) -> No
     output_path = output_path.replace(".html", ".md")
 
     if not dry_run:
-        write(output_path, markdown_content)
+        FileManager.write(output_path, markdown_content)
         pbar.update(1)
     else:
-        logging.info(f"Would write {len(markdown_content)} bytes to {output_path}")
+        get_default_logger(__name__, logging.INFO).info(
+            f"Would write {len(markdown_content)} bytes to {output_path}"
+        )
