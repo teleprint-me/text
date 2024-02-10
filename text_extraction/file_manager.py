@@ -15,7 +15,16 @@ import tqdm
 
 from text_extraction.logger import get_default_logger
 
-HTMLProcess = [os.DirEntry, Union[str, Path], bool, Logger, tqdm.tqdm]
+HTMLProcess = Callable[
+    [
+        os.DirEntry,
+        Union[str, Path],
+        bool,
+        Logger,
+        Optional[tqdm.tqdm],
+    ],
+    None,
+]
 
 
 class FileManager:
@@ -61,7 +70,7 @@ class FileManager:
     def traverse_directory(
         file_entry_list: List[os.DirEntry],
         output_dir: Union[str, Path],
-        process_entry: Callable[HTMLProcess, None],
+        process_entry: HTMLProcess,
         n_threads: int,
         dry_run: bool,
         logger: Logger,
