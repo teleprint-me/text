@@ -9,7 +9,7 @@ Copyright (C) 2024 Austin Berrio
 import argparse
 import os
 
-from byte_pair.processor.pdf import convert_pdf_to_text
+from text_extraction.processor.pdf import convert_pdf_to_text
 
 
 def get_arguments() -> argparse.Namespace:

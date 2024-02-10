@@ -13,7 +13,7 @@ import logging
 import os
 import time
 
-from byte_pair.processor.html import collect_files, traverse_directory
+from text_extraction.processor.html import collect_files, traverse_directory
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)

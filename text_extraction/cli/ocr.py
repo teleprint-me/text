@@ -8,7 +8,7 @@ Copyright (C) 2024 Austin Berrio
 
 import argparse
 
-from byte_pair.processor.ocr import ImageProcessor
+from text_extraction.processor.ocr import ImageProcessor
 
 
 def get_arguments() -> argparse.Namespace:
