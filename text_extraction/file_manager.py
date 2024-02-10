@@ -15,6 +15,8 @@ import tqdm
 
 from text_extraction.logger import get_default_logger
 
+HTMLProcess = [os.DirEntry, Union[str, Path], bool, Logger, tqdm.tqdm]
+
 
 class FileManager:
     @staticmethod
@@ -58,8 +60,8 @@ class FileManager:
     @staticmethod
     def traverse_directory(
         file_entry_list: List[os.DirEntry],
-        output_path: Union[str, Path],
-        process_entry: Callable[[os.DirEntry, str, tqdm.tqdm, bool, Logger], None],
+        output_dir: Union[str, Path],
+        process_entry: Callable[HTMLProcess, None],
         n_threads: int,
         dry_run: bool,
         logger: Logger,
@@ -69,10 +71,10 @@ class FileManager:
                 for _ in executor.map(
                     lambda file_entry: process_entry(
                         file_entry,
-                        output_path,
-                        pbar,
+                        output_dir,
                         dry_run,
                         logger,
+                        pbar,
                     ),
                     file_entry_list,
                 ):
