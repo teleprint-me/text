@@ -7,6 +7,8 @@ Copyright (C) 2024 Austin Berrio
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
+from logging import Logger
+from pathlib import Path
 from typing import Callable, List, Optional, Union
 
 import tqdm
@@ -16,7 +18,7 @@ from text_extraction.logger import get_default_logger
 
 class FileManager:
     @staticmethod
-    def read(file_path: str) -> Optional[str]:
+    def read(file_path: Union[str, Path]) -> Optional[str]:
         """Read content from a source file."""
         try:
             with open(file_path, "r") as f:
@@ -28,7 +30,7 @@ class FileManager:
         return None
 
     @staticmethod
-    def write(file_path: str, content: str) -> None:
+    def write(file_path: Union[str, Path], content: str) -> None:
         """Write content to a destination file."""
         try:
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -56,14 +58,22 @@ class FileManager:
     @staticmethod
     def traverse_directory(
         file_entry_list: List[os.DirEntry],
-        process_entry: Callable[[os.DirEntry, tqdm.tqdm, bool], None],
+        output_path: Union[str, Path],
+        process_entry: Callable[[os.DirEntry, str, tqdm.tqdm, bool, Logger], None],
         n_threads: int,
         dry_run: bool,
+        logger: Logger,
     ) -> None:
         with ThreadPoolExecutor(max_workers=n_threads) as executor:
             with tqdm.tqdm(total=len(file_entry_list)) as pbar:
                 for _ in executor.map(
-                    lambda file_entry: process_entry(file_entry, pbar, dry_run),
+                    lambda file_entry: process_entry(
+                        file_entry,
+                        output_path,
+                        pbar,
+                        dry_run,
+                        logger,
+                    ),
                     file_entry_list,
                 ):
                     pass
