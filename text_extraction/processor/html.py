@@ -5,6 +5,7 @@ Copyright (C) 2024 Austin Berrio
 """
 
 import os
+import time
 from logging import Logger
 from pathlib import Path
 from typing import Optional, Union
@@ -47,7 +48,7 @@ def replace_code_tags_with_backticks(markdown_text: str) -> str:
     return markdown_text.replace("[code]", "```").replace("[/code]", "```")
 
 
-def process_content(html_content: str) -> str:
+def process_html_content(html_content: str) -> str:
     """Process HTML content to clean and convert to Markdown."""
     cleaned_html = clean_code_blocks(html_content)
     # NOTE: Substitute anchor paths to maintain references
@@ -65,7 +66,7 @@ def get_output_file_path(
     return Path(output_dir) / output_file_name
 
 
-def process_file_entry(
+def process_html_file_entry(
     file_entry: Union[str, Path, os.DirEntry],
     output_dir: Union[str, Path],
     dry_run: bool,
@@ -83,7 +84,7 @@ def process_file_entry(
         logger.error(f"Failed to read {file_entry.name}. Skipping.")
         return
 
-    markdown_content = process_content(html_content)
+    markdown_content = process_html_content(html_content)
 
     if output_dir.is_file():
         raise ValueError("Expected a directory. Got a file instead.")
@@ -98,3 +99,26 @@ def process_file_entry(
 
     if pbar:
         pbar.update(1)
+
+
+def process_html_directory(
+    input_dir: Union[str, Path],
+    output_dir: Union[str, Path],
+    n_threads: int,
+    dry_run: bool,
+    logger: Logger,
+) -> None:
+    logger.info("Starting directory processing.")
+    start_time = time.time()
+    file_entry_list = FileManager.collect_files(input_dir)
+    FileManager.traverse_directory(
+        file_entry_list,
+        output_dir,
+        process_html_file_entry,
+        n_threads,
+        dry_run,
+        logger,
+    )
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    logger.info(f"Elapsed {elapsed_time:.2f} seconds using {n_threads} threads.")
