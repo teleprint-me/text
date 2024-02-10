@@ -61,8 +61,7 @@ def get_output_file_path(
     input_file_path: Union[str, Path], output_dir: Union[str, Path]
 ) -> Path:
     """Generate the output file path with a .md extension."""
-    input_file_path = Path(input_file_path)
-    output_file_name = input_file_path.stem + ".md"
+    output_file_name = Path(input_file_path).stem + ".md"
     return Path(output_dir) / output_file_name
 
 
@@ -74,12 +73,14 @@ def process_file_entry(
     pbar: Optional[tqdm.tqdm] = None,
 ) -> None:
     """Process a file or directory entry and convert it from HTML to Markdown."""
-    file_path = Path(
+    file_entry = Path(
         file_entry.path if isinstance(file_entry, os.DirEntry) else file_entry
     )
-    html_content = FileManager.read(file_path)
+    output_dir = Path(output_dir)
+
+    html_content = FileManager.read(file_entry)
     if html_content is None:
-        logger.error(f"Failed to read {file_path}. Skipping.")
+        logger.error(f"Failed to read {file_entry.name}. Skipping.")
         return
 
     markdown_content = process_content(html_content)
@@ -87,7 +88,7 @@ def process_file_entry(
     if output_dir.is_file():
         raise ValueError("Expected a directory. Got a file instead.")
 
-    output_file = get_output_file_path(file_path, output_dir)
+    output_file = get_output_file_path(file_entry, output_dir)
 
     if dry_run:
         logger.info(f"Would write {len(markdown_content)} bytes to {output_file}")
