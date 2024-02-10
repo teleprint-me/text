@@ -4,9 +4,10 @@ text_extraction/processor/html.py
 Copyright (C) 2024 Austin Berrio
 """
 
-import logging
 import os
-import re
+from logging import Logger
+from pathlib import Path
+from typing import Optional, Union
 
 import html2text
 import tqdm
@@ -14,30 +15,23 @@ from bs4 import BeautifulSoup
 from markdown_it import MarkdownIt
 
 from text_extraction.file_manager import FileManager
-from text_extraction.logger import get_default_logger
 
 
 def clean_code_blocks(html: str) -> str:
-    # Initialize BeautifulSoup
+    """Clean up 'pre' blocks by removing 'a' tags within them."""
     soup = BeautifulSoup(html, "html.parser")
 
-    # Find all 'pre' tags
     for pre_tag in soup.find_all("pre"):
-        # Find all 'a' tags within each 'pre' tag
         for a_tag in pre_tag.find_all("a"):
-            # Replace 'a' tag with its contents
             a_tag.replace_with(a_tag.text)
 
-    # Convert back to string
-    cleaned_html = str(soup)
-
-    return cleaned_html
+    return str(soup)
 
 
-def convert_html_to_markdown(
-    html: str,
-) -> str:
+def convert_html_to_markdown(html: str) -> str:
+    """Convert HTML content to Markdown format."""
     h = html2text.HTML2Text()
+
     h.body_width = 0  # No line wrapping
     h.single_line_break = True  # Single newlines turn into <br>
     h.ignore_links = True
@@ -49,33 +43,57 @@ def convert_html_to_markdown(
 
 
 def replace_code_tags_with_backticks(markdown_text: str) -> str:
-    # Replace `[code]` with triple backticks
-    markdown_text = re.sub(r"\[code\]", "```", markdown_text)
-    # Replace `[/code]` with triple backticks
-    markdown_text = re.sub(r"\[/code\]", "```", markdown_text)
-    return markdown_text
+    """Replace custom [code] tags with Markdown code block syntax."""
+    return markdown_text.replace("[code]", "```").replace("[/code]", "```")
 
 
-def process_entry(file_entry: os.DirEntry, pbar: tqdm.tqdm, dry_run: bool) -> None:
-    """Process a single directory entry (file) and convert it to Markdown if needed."""
-    logger = get_default_logger(__name__, logging.INFO)
-    html_content = FileManager.read(file_entry.path)
+def process_content(html_content: str) -> str:
+    """Process HTML content to clean and convert to Markdown."""
+    cleaned_html = clean_code_blocks(html_content)
+    # NOTE: Substitute anchor paths to maintain references
+    markdown_content = convert_html_to_markdown(cleaned_html).replace(".html", ".md")
+    # NOTE: Replacing code tags with backticks has inconsistent side effects.
+    final_content = replace_code_tags_with_backticks(markdown_content)
+    return final_content
+
+
+def get_output_file_path(
+    input_file_path: Union[str, Path], output_dir: Union[str, Path]
+) -> Path:
+    """Generate the output file path with a .md extension."""
+    input_file_path = Path(input_file_path)
+    output_file_name = input_file_path.stem + ".md"
+    return Path(output_dir) / output_file_name
+
+
+def process_file_entry(
+    file_entry: Union[str, Path, os.DirEntry],
+    output_dir: Union[str, Path],
+    dry_run: bool,
+    logger: Logger,
+    pbar: Optional[tqdm.tqdm] = None,
+) -> None:
+    """Process a file or directory entry and convert it from HTML to Markdown."""
+    file_path = Path(
+        file_entry.path if isinstance(file_entry, os.DirEntry) else file_entry
+    )
+    html_content = FileManager.read(file_path)
     if html_content is None:
-        logger.error(
-            f"An error occurred while reading the file {file_entry.name}. Skipping."
-        )
+        logger.error(f"Failed to read {file_path}. Skipping.")
         return
 
-    html_content = clean_code_blocks(html_content)
-    markdown_content = convert_html_to_markdown(html_content)
-    markdown_content = markdown_content.replace(".html", ".md")
-    output_path = os.path.join("markdown_dataset", file_entry.path).replace(
-        ".html", ".md"
-    )
+    markdown_content = process_content(html_content)
+
+    if output_dir.is_file():
+        raise ValueError("Expected a directory. Got a file instead.")
+
+    output_file = get_output_file_path(file_path, output_dir)
 
     if dry_run:
-        logger.info(f"Would write {len(markdown_content)} bytes to {output_path}")
+        logger.info(f"Would write {len(markdown_content)} bytes to {output_file}")
         return
 
-    FileManager.write(output_path, markdown_content)
-    pbar.update(1)
+    FileManager.write(output_file, markdown_content)
+
+    if pbar:
+        pbar.update(1)
