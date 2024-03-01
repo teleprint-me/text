@@ -97,7 +97,27 @@ def format_conversation(data: List[Dict[str, str]]) -> str:
 
 
 def format_openai(data: List[Dict[str, Any]]) -> str:
-    pass
+    # set a string to concatenate results to
+    plaintext = ""
+    # iterate over each record in the dataset
+    for record in data:
+        # extract the mapping from the dataset
+        mapping = record["mapping"]
+        # discover the message author and content
+        # NOTE: key is a uuid that references another mapping
+        for _, value in mapping.items():
+            # value is the mapping that key is referencing
+            message = value.get("message")
+            # NOTE: message can be null
+            if message:
+                # attempt to extract the role and content from the data structure
+                role = message.get("author", {}).get("role", "")
+                content = "".join([part for part in message.get("content", [])])
+                # NOTE: role and content can be empty
+                if role and content:
+                    # concatenate the extracted data
+                    plaintext += f"{role}\n{content}\n"
+    return plaintext
 
 
 def format_conversational_data(input_file: str, output_file: str) -> None:
