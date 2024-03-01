@@ -72,13 +72,14 @@ def is_openai_format(data: List[Dict[str, Any]]) -> bool:
         return False  # There are no "id" and/or "mapping" keys
 
     # get a key from the mapping. we only need one.
-    key = element["mapping"].keys()[0]
+    key = list(element["mapping"].keys())[0]
     # split key uuid into parts
     key_parts = key.split("-")
     # uuids have 5 parts and each part is alphanumeric
-    if 5 != key_parts or not key_parts[0].isalnum():
+    if 5 != len(key_parts) or not key_parts[0].isalnum():
+        print("not a valid openai format")
         return False  # It's not a UUID
-
+    print("openai format okay")
     return True
 
 
@@ -112,7 +113,9 @@ def format_openai(data: List[Dict[str, Any]]) -> str:
             if message:
                 # attempt to extract the role and content from the data structure
                 role = message.get("author", {}).get("role", "")
-                content = "".join([part for part in message.get("content", [])])
+                content = "\n".join(
+                    [part for part in message.get("content", {}).get("parts", [])]
+                )
                 # NOTE: role and content can be empty
                 if role and content:
                     # concatenate the extracted data
@@ -156,7 +159,7 @@ def get_parser_arguments() -> argparse.Namespace:
 
 def main() -> None:
     args = get_parser_arguments()
-    format_conversation(args.input_file, args.output_file)
+    format_conversational_data(args.input_file, args.output_file)
 
 
 if __name__ == "__main__":
