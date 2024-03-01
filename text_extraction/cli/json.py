@@ -77,9 +77,8 @@ def is_openai_format(data: List[Dict[str, Any]]) -> bool:
     key_parts = key.split("-")
     # uuids have 5 parts and each part is alphanumeric
     if 5 != len(key_parts) or not key_parts[0].isalnum():
-        print("not a valid openai format")
         return False  # It's not a UUID
-    print("openai format okay")
+
     return True
 
 
@@ -119,7 +118,7 @@ def format_openai(data: List[Dict[str, Any]]) -> str:
                 # NOTE: role and content can be empty
                 if role and content:
                     # concatenate the extracted data
-                    plaintext += f"{role}\n{content}\n"
+                    plaintext += f"{role}\n{content}\n\n"
     return plaintext
 
 
