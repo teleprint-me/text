@@ -161,9 +161,18 @@ class ImageProcessor:
         each contour region using pytesseract's `image_to_string` function. The extracted
         text is returned as a single string.
         """
-        contours, _ = cv2.findContours(
-            self.image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-        )
+        try:
+            contours, _ = cv2.findContours(
+                self.image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+            )
+        except cv2.error as e:
+            print(e)
+            print(
+                "The image format is unsupported.",
+                "Try converting the image to grayscale first with -g.",
+            )
+            exit(1)
+
         contours = sorted(contours, key=lambda x: cv2.boundingRect(x)[1])
         extracted_text = ""
         for contour in contours:
