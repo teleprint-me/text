@@ -58,6 +58,10 @@ def process_html_content(html_content: str) -> str:
     return final_content
 
 
+def get_input_file_path(file_entry: Union[str, Path, os.DirEntry]) -> Path:
+    pass
+
+
 def get_output_file_path(
     input_file_path: Union[str, Path], output_dir: Union[str, Path]
 ) -> Path:
@@ -77,7 +81,11 @@ def process_html_file_entry(
     file_entry = Path(
         file_entry.path if isinstance(file_entry, os.DirEntry) else file_entry
     )
-    output_dir = Path(output_dir)
+    output_dir = Path(
+        os.path.join(output_dir, file_entry.path)
+        if isinstance(file_entry, os.DirEntry)
+        else os.path.join(output_dir, file_entry)
+    )
 
     html_content = FileManager.read(file_entry)
     if html_content is None:
