@@ -135,6 +135,7 @@ class WebsiteManager:
     def _fetch_html_content(self, html_path: str, url: str) -> str:
         html_content = self.cache.read(html_path)
         if html_content is None:
+            print("No cache found. Fetching content instead.")
             html_content = self.fetcher.fetch_content(url)
             # Cache the HTML content
             self.cache.write(html_path, html_content)
@@ -188,7 +189,7 @@ def get_arguments() -> argparse.Namespace:
 
 def main():
     args = get_arguments()
-    print(f"Attempting to get content from {args.url}")
+    print(f"Attempting to fetch content from {args.url}")
     website_manager = WebsiteManager(args.cache)
     markdown_path, markdown_content = website_manager.get(
         args.url,
