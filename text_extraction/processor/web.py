@@ -20,16 +20,26 @@ class WebsiteCache:
             cache_path = "."
         self.path = cache_path
 
+    @property
+    def path(self) -> Path:
+        return self._cache_path
+
+    @path.setter
+    def path(self, value: Union[str, Path]):
+        if isinstance(value, Path):
+            self._cache_path = value
+        else:  # convert str to Path instance
+            self._cache_path = Path(value)
+
     def read(self, endpoint: Union[str, Path]) -> Optional[str]:
-        file_path = self.path + endpoint
-        try:
-            with open(file_path, "r") as f:
+        try:  # if path exists
+            with open(self.path / endpoint, "r") as f:
                 return f.read()
         except FileNotFoundError:
-            return None  # No such content exists
+            return None  # No such path exists
 
     def write(self, endpoint: str, content: str) -> None:
-        file_path = self.path + endpoint
+        file_path = self.path / endpoint
         # create the directory even if it exists
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w") as f:
