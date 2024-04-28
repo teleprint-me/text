@@ -1,3 +1,9 @@
+"""
+text_extraction/processor/web.py
+
+Copyright (C) 2024 Austin Berrio
+"""
+
 import os
 from pathlib import Path
 from typing import Optional, Union
