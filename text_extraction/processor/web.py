@@ -6,7 +6,7 @@ Copyright (C) 2024 Austin Berrio
 
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import html2text
@@ -37,7 +37,7 @@ class WebsiteCache:
 
 
 class WebsiteFetcher:
-    def fetch_content(url: str) -> str:
+    def fetch_content(self, url: str) -> str:
         # Configure WebDriver to run headlessly
         options = Options()
         options.headless = True
@@ -59,7 +59,7 @@ class WebsiteFetcher:
             # Close the WebDriver
             driver.quit()
 
-    def convert_html_to_markdown(html: str) -> str:
+    def convert_html_to_markdown(self, html: str) -> str:
         h = html2text.HTML2Text()
         h.wrap_links = True
         h.single_line_break = True
@@ -83,41 +83,33 @@ class WebsiteManager:
     def cache_path(self, value: str) -> None:
         self.website_fetcher.cache_path = value
 
-    def get(self, url: str) -> str:
+    def get(self, url: str) -> Tuple[str, str]:
         # Get the paths for the cache
         html_path, markdown_path = self._get_cache_paths(url)
-
         # Try to read from cache
         markdown_content = self.cache.read(markdown_path)
-        if markdown_content is not None:
-            return self.queue_proxy.handle_content_size(markdown_content, markdown_path)
-
         # If the cache does not exist, fetch the HTML content
         html_content = self._fetch_html_content(html_path, url)
         # Convert HTML to markdown
         markdown_content = self.fetcher.convert_html_to_markdown(html_content)
         # Cache the markdown content
         self.cache.write(markdown_path, markdown_content)
-
-        return self.queue_proxy.handle_content_size(markdown_content, markdown_path)
+        return markdown_path, markdown_content
 
     def _get_cache_paths(self, url: str) -> tuple[str, str]:
         # Create paths for the cache
         parsed_url = urlparse(url)
         domain = parsed_url.netloc
-
         # Remove leading slash
         # If path is empty, use 'index' as the default filename
         path = parsed_url.path.lstrip("/") or "index.html"
         html_path = os.path.join(self.cache.path, "html", domain, path)
-
         markdown_path = os.path.join(
             self.cache.path,
             "markdown",
             domain,
             f"{os.path.splitext(path)[0]}.md",
         )
-
         return html_path, markdown_path
 
     def _fetch_html_content(self, html_path: str, url: str) -> str:
@@ -126,5 +118,4 @@ class WebsiteManager:
             html_content = self.fetcher.fetch_content(url)
             # Cache the HTML content
             self.cache.write(html_path, html_content)
-
         return html_content
