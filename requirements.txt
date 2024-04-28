@@ -19,6 +19,7 @@ opencv-python  # OpenCV (Open Source Computer Vision Library) for image processi
 pytesseract  # Python wrapper for Google's Tesseract OCR engine, used to extract text from images
 
 # Text extraction from markdown and HTML
+selenium  # Library for automating web browser interactions
 beautifulsoup4  # Library for parsing HTML and XML documents
 html2text  # Library to convert HTML documents to plain text
 mdformat  # Library for CommonMark compliant Markdown formatting
