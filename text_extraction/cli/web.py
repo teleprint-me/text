@@ -50,7 +50,8 @@ class WebsiteFetcher:
     def fetch_content(self, url: str) -> str:
         # Configure WebDriver to run headlessly
         options = Options()
-        options.headless = True
+        # `options.headless = True` has been deprecated and removed
+        options.add_argument("--headless=new")
 
         # Set up the WebDriver
         driver = webdriver.Chrome(
