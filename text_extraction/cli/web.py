@@ -47,24 +47,25 @@ class WebsiteCache:
 
 
 class WebsiteFetcher:
-    def fetch_content(self, url: str) -> str:
+    def __init__(self):
         # Configure WebDriver to run headlessly
-        options = Options()
-        # `options.headless = True` has been deprecated and removed
-        options.add_argument("--headless=new")
+        self.options = Options()
+        # NOTE: `options.headless = True` has been deprecated and removed
+        self.options.add_argument("--headless=new")
 
-        # Set up the WebDriver
-        driver = webdriver.Chrome(
-            options=options
-        )  # or webdriver.Firefox() or another browser driver
-
+    def fetch_content(self, url: str) -> str:
         try:
+            # Set up the WebDriver
+            driver = webdriver.Chrome(
+                options=self.options
+            )  # or webdriver.Firefox() or another browser driver
             # Navigate to the webpage
             driver.get(url)
             # Retrieve the HTML content of the webpage
             html_content = driver.page_source
             return html_content
         except Exception as e:
+            # Fail gracefully and return the error message as a string
             return f"Error fetching content from {url}: {str(e)}."
         finally:
             # Close the WebDriver
