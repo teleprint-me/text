@@ -22,10 +22,11 @@ class WebsiteCache:
 
     def read(self, endpoint: Union[str, Path]) -> Optional[str]:
         file_path = self.path + endpoint
-        if os.path.exists(file_path):
+        try:
             with open(file_path, "r") as f:
                 return f.read()
-        return None  # No such content exists
+        except FileNotFoundError:
+            return None  # No such content exists
 
     def write(self, endpoint: str, content: str) -> None:
         file_path = self.path + endpoint
