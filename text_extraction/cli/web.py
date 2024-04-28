@@ -7,7 +7,7 @@ Copyright (C) 2024 Austin Berrio
 import argparse
 import os
 from pathlib import Path
-from typing import Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import html2text
@@ -71,14 +71,18 @@ class WebsiteFetcher:
             # Close the WebDriver
             driver.quit()
 
-    def convert_html_to_markdown(self, html: str) -> str:
+    def convert_html_to_markdown(
+        self, html: str, settings: Optional[Dict[str, bool]] = None
+    ) -> str:
+        if settings is None:
+            settings = {}
         h = html2text.HTML2Text()
-        h.wrap_links = True
-        h.single_line_break = True
-        h.mark_code = True
-        h.wrap_list_items = True
-        h.wrap_tables = True
-        h.re_md_chars_matcher_all = True
+        h.wrap_links = settings.get("wrap_links", True)
+        h.single_line_break = settings.get("single_line_break", True)
+        h.mark_code = settings.get("mark_code", True)
+        h.wrap_list_items = settings.get("wrap_list_items", True)
+        h.wrap_tables = settings.get("wrap_tables", True)
+        h.re_md_chars_matcher_all = settings.get("re_md_chard_matcher_all", True)
         return h.handle(html).strip()
 
 
@@ -95,7 +99,9 @@ class WebsiteManager:
     def cache_path(self, value: Union[str, Path]) -> None:
         self.cache.path = value
 
-    def get(self, url: str) -> Tuple[str, str]:
+    def get(
+        self, url: str, markdown_settings: Optional[Dict[str, bool]] = None
+    ) -> Tuple[str, str]:
         # Get the paths for the cache
         html_path, markdown_path = self._get_cache_paths(url)
         # Try to read from cache
@@ -103,7 +109,9 @@ class WebsiteManager:
         # If the cache does not exist, fetch the HTML content
         html_content = self._fetch_html_content(html_path, url)
         # Convert HTML to markdown
-        markdown_content = self.fetcher.convert_html_to_markdown(html_content)
+        markdown_content = self.fetcher.convert_html_to_markdown(
+            html_content, markdown_settings
+        )
         # Cache the markdown content
         self.cache.write(markdown_path, markdown_content)
         return markdown_path, markdown_content
@@ -151,13 +159,48 @@ def get_arguments() -> argparse.Namespace:
         action="store_true",
         help="Output the resulting markdown content to standard output",
     )
+    parser.add_argument(
+        "--wrap-links", action="store_false", help="Wrap links. Default is True."
+    )
+    parser.add_argument(
+        "--single-line-break",
+        action="store_false",
+        help="Single line break. Default is True.",
+    )
+    parser.add_argument(
+        "--mark-code", action="store_false", help="Mark code. Default is True."
+    )
+    parser.add_argument(
+        "--wrap-list-items",
+        action="store_false",
+        help="Wrap list items. Default is True.",
+    )
+    parser.add_argument(
+        "--wrap-tables", action="store_false", help="Wrap tables. Default is True."
+    )
+    parser.add_argument(
+        "--re-md-chars-matcher-all",
+        action="store_false",
+        help="Pattern match all markdown characters. Default is True.",
+    )
     return parser.parse_args()
 
 
 def main():
     args = get_arguments()
+    print(f"Attempting to get content from {args.url}")
     website_manager = WebsiteManager(args.cache)
-    markdown_path, markdown_content = website_manager.get(args.url)
+    markdown_path, markdown_content = website_manager.get(
+        args.url,
+        {
+            "wrap_links": args.wrap_links,
+            "single_line_break": args.single_line_break,
+            "mark_code": args.mark_code,
+            "wrap_list_items": args.wrap_list_items,
+            "wrap_tables": args.wrap_tables,
+            "re_md_chars_matcher_all": args.re_md_chars_matcher_all,
+        },
+    )
     if args.stdout:
         print(markdown_content)
     print(f"Wrote {len(markdown_content)} bytes to {markdown_path}")
