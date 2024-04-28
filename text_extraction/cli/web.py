@@ -112,8 +112,12 @@ class WebsiteManager:
         markdown_content = self.fetcher.convert_html_to_markdown(
             html_content, markdown_settings
         )
-        # Cache the markdown content
-        self.cache.write(markdown_path, markdown_content)
+        # Cache the markdown
+        try:
+            self.cache.write(markdown_path, markdown_content)
+        except IsADirectoryError:
+            # remove the trailing slash, e.g. `/`
+            self.cache.write(markdown_path[:-1], markdown_content)
         return markdown_path, markdown_content
 
     def _get_cache_paths(self, url: str) -> tuple[str, str]:
