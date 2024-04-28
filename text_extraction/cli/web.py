@@ -4,6 +4,7 @@ text_extraction/processor/web.py
 Copyright (C) 2024 Austin Berrio
 """
 
+import argparse
 import os
 from pathlib import Path
 from typing import Optional, Tuple, Union
@@ -128,3 +129,37 @@ class WebsiteManager:
             # Cache the HTML content
             self.cache.write(html_path, html_content)
         return html_content
+
+
+def get_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "url",
+        type=str,
+        help="The website url to download the webpage from",
+    )
+    parser.add_argument(
+        "--cache",
+        metavar="PATH",
+        type=str,
+        help="The cache path to write the html and markdown documents to. Default is current working directory.",
+    )
+    parser.add_argument(
+        "--stdout",
+        action="store_true",
+        help="Output the resulting markdown content to standard output",
+    )
+    return parser.parse_args()
+
+
+def main():
+    args = get_arguments()
+    website_manager = WebsiteManager(args.cache)
+    markdown_path, markdown_content = website_manager.get(args.url)
+    if args.stdout:
+        print(markdown_content)
+    print(f"Wrote {len(markdown_content)} bytes to {markdown_path}")
+
+
+if __name__ == "__main__":
+    main()
