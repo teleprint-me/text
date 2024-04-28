@@ -31,18 +31,17 @@ class WebsiteCache:
         else:  # convert str to Path instance
             self._cache_path = Path(value)
 
-    def read(self, endpoint: Union[str, Path]) -> Optional[str]:
+    def read(self, path: Union[str, Path]) -> Optional[str]:
         try:  # if path exists
-            with open(self.path / endpoint, "r") as f:
+            with open(path, "r") as f:
                 return f.read()
         except FileNotFoundError:
             return None  # No such path exists
 
-    def write(self, endpoint: str, content: str) -> None:
-        file_path = self.path / endpoint
+    def write(self, path: str, content: str) -> None:
         # create the directory even if it exists
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, "w") as f:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as f:
             f.write(content)
 
 
@@ -86,12 +85,12 @@ class WebsiteManager:
         self.fetcher = WebsiteFetcher()
 
     @property
-    def cache_path(self) -> str:
-        return self.fetcher.cache_path
+    def cache_path(self) -> Path:
+        return self.cache.path
 
     @cache_path.setter
-    def cache_path(self, value: str) -> None:
-        self.website_fetcher.cache_path = value
+    def cache_path(self, value: Union[str, Path]) -> None:
+        self.cache.path = value
 
     def get(self, url: str) -> Tuple[str, str]:
         # Get the paths for the cache
