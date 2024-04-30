@@ -8,7 +8,7 @@ import argparse
 import os
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
-from urllib.parse import urlparse
+from urllib.parse import ParseResult, urlparse
 
 import html2text
 from selenium import webdriver
@@ -118,9 +118,7 @@ class WebsiteManager:
         # Create paths for the cache
         parsed_url = urlparse(url)
         domain = parsed_url.netloc
-        # Remove leading slash
-        # If path is empty, use 'index' as the default filename
-        path = parsed_url.path.lstrip("/") or "index.html"
+        path = self._parse_url_path(parsed_url)
         html_path = os.path.join(self.cache.path, "html", domain, path)
         markdown_path = os.path.join(
             self.cache.path,
@@ -129,6 +127,20 @@ class WebsiteManager:
             f"{os.path.splitext(path)[0]}.md",
         )
         return html_path, markdown_path
+
+    def _parse_url_path(self, parsed_url: ParseResult) -> str:
+        print("Parsed URL Path:", parsed_url.path)
+        # Remove leading and ending "/" characters
+        path = parsed_url.path.strip("/")
+        # If path is empty, use 'index' as the default filename
+        if not path:
+            path = "index.html"
+        # If no suffix is given, assume content is html
+        if ".html" not in path:
+            path += ".html"
+        print("Derived HTML Path:", path)
+        # Return the derived path
+        return path
 
     def _cache_markdown(self, path: str, content: str) -> None:
         try:
