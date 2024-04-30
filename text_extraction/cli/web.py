@@ -36,7 +36,7 @@ class WebsiteCache:
         try:  # if path exists
             with open(path, "r") as f:
                 return f.read()
-        except FileNotFoundError:
+        except (FileNotFoundError, NotADirectoryError):
             return None  # No such path exists
 
     def write(self, path: str, content: str) -> None:
