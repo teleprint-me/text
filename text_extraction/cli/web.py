@@ -82,7 +82,6 @@ class WebsiteFetcher:
         h.mark_code = settings.get("mark_code", True)
         h.wrap_list_items = settings.get("wrap_list_items", True)
         h.wrap_tables = settings.get("wrap_tables", True)
-        h.re_md_chars_matcher_all = settings.get("re_md_chard_matcher_all", True)
         return h.handle(html).strip()
 
 
@@ -183,11 +182,6 @@ def get_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--wrap-tables", action="store_false", help="Wrap tables. Default is True."
     )
-    parser.add_argument(
-        "--re-md-chars-matcher-all",
-        action="store_false",
-        help="Pattern match all markdown characters. Default is True.",
-    )
     return parser.parse_args()
 
 
@@ -203,7 +197,6 @@ def main():
             "mark_code": args.mark_code,
             "wrap_list_items": args.wrap_list_items,
             "wrap_tables": args.wrap_tables,
-            "re_md_chars_matcher_all": args.re_md_chars_matcher_all,
         },
     )
     if args.stdout:
