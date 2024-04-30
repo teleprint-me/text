@@ -111,12 +111,7 @@ class WebsiteManager:
         markdown_content = self.fetcher.convert_html_to_markdown(
             html_content, markdown_settings
         )
-        # Cache the markdown
-        try:
-            self.cache.write(markdown_path, markdown_content)
-        except IsADirectoryError:
-            # remove the trailing slash, e.g. `/`
-            self.cache.write(markdown_path[:-1], markdown_content)
+        self._cache_markdown(markdown_path, markdown_content)
         return markdown_path, markdown_content
 
     def _get_cache_paths(self, url: str) -> tuple[str, str]:
@@ -135,13 +130,21 @@ class WebsiteManager:
         )
         return html_path, markdown_path
 
-    def _fetch_html_content(self, html_path: str, url: str) -> str:
-        html_content = self.cache.read(html_path)
+    def _cache_markdown(self, path: str, content: str) -> None:
+        try:
+            # Cache the markdown
+            self.cache.write(path, content)
+        except IsADirectoryError:
+            # remove the trailing slash, e.g. `/`
+            self.cache.write(path[:-1], content)
+
+    def _fetch_html_content(self, path: str, url: str) -> str:
+        html_content = self.cache.read(path)
         if html_content is None:
             print("No cache found. Fetching content instead.")
             html_content = self.fetcher.fetch_content(url)
             # Cache the HTML content
-            self.cache.write(html_path, html_content)
+            self.cache.write(path, html_content)
         return html_content
 
 
