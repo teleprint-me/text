@@ -4,7 +4,7 @@ black==24.4.2
 blessed==1.20.0
 bpython==0.24
 build==1.2.1
-certifi==2024.2.2
+certifi==2024.7.4
 charset-normalizer==3.3.2
 click==8.1.7
 curtsies==0.4.2
