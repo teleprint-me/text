@@ -13,7 +13,7 @@ from typing import Callable, List, Optional, Union
 
 import tqdm
 
-from text_extraction.logger import get_default_logger
+from text.logger import get_default_logger
 
 HTMLProcess = Callable[
     [

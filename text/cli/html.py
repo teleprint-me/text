@@ -21,8 +21,8 @@ import tqdm
 from bs4 import BeautifulSoup
 from markdown_it import MarkdownIt
 
-from text_extraction.file_manager import FileManager
-from text_extraction.logger import get_default_logger
+from text.file_manager import FileManager
+from text.logger import get_default_logger
 
 
 def clean_code_blocks(html: str) -> str:
