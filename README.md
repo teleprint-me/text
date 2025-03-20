@@ -34,13 +34,13 @@ Once installed, you can use the CLI tools to extract text from different file fo
 
 ```sh
 # Extract text from an image
-python -m text.cli.ocr --path_image <image_path>
+python -m text.cli.ocr -i <image_file> -o <text_file>
 
 # Extract text from a PDF
-python -m text.cli.pdf -i <pdf_path>
+python -m text.cli.pdf -i <pdf_file> -o <text_file>
 
 # Extract text from an HTML file
-python -m text.cli.html --dir-path <directory_path>
+python -m text.cli.html -i <file_or_dir_path>
 ```
 
 ## **Contributing**
