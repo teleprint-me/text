@@ -2,6 +2,10 @@
 
 Text is a Python package for extracting, parsing, and automating text pipelines from various file formats, including **plain text, Markdown, HTML, PDFs, and images**.
 
+> _**DISCLAIMER:** It is your responsibility to comply with copyright laws. This library is **not** intended to bypass or circumvent restrictions but to facilitate dataset preparation and analysis for advanced modeling techniques._
+
+> _**NOTE:** This repository is currently a work in progress. Text extraction, parsing, and mining are incredibly challenging—each dataset comes with its own set of edge cases, making generalization difficult._
+
 ## **Getting Started**
 
 ### **Prerequisites**
@@ -39,8 +43,11 @@ python -m text.cli.ocr -i <image_file> -o <text_file>
 # Extract text from a PDF
 python -m text.cli.pdf -i <pdf_file> -o <text_file>
 
-# Extract text from an HTML file
-python -m text.cli.html -i <file_or_dir_path>
+# Extract text from an HTML file or directory
+python -m text.cli.html -i <html_file_or_dir>
+
+# Extract text from a web page and cache results
+python -m text.cli.web --cache <cache_dir> <url>
 ```
 
 ## **Contributing**
