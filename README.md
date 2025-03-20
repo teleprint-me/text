@@ -1,6 +1,6 @@
-# Text Extraction
+# Text
 
-Text Extraction is a Python package for extracting text from various file formats such as images, PDFs, and HTML documents.
+Text is a Python package for extracting, parsing, and automating text pipelines from various file formats such as plain text, html, images, and pdf documents.
 
 ## Getting Started
 
@@ -25,8 +25,8 @@ sudo pacman -S tesseract
 Clone the repository, create a virtual environment, activate it, and install the required dependencies using pip.
 
 ```sh
-git clone https://github.com/teleprint-me/text-extraction
-cd text-extraction
+git clone https://github.com/teleprint-me/text
+cd text
 virtualenv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -38,13 +38,13 @@ Once the package and its dependencies are installed, you can use the command-lin
 
 ```sh
 # Example command for extracting text from an image
-python -m text_extraction.cli.ocr --path_image <image_path>
+python -m text.cli.ocr --path_image <image_path>
 
 # Example command for extracting text from a PDF
-python -m text_extraction.cli.pdf --path_input <pdf_path>
+python -m text.cli.pdf --path_input <pdf_path>
 
 # Example command for extracting text from an HTML file
-python -m text_extraction.cli.html --dir-path <directory_path>
+python -m text.cli.html --dir-path <directory_path>
 ```
 
 ## Contributions
@@ -53,4 +53,4 @@ Contributions are welcome! Feel free to submit bug reports, feature requests, or
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the AGPL License - see the [LICENSE](LICENSE) file for details.
